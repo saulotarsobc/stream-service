@@ -1,0 +1,4 @@
+**/aulas
+/node_modules
+/dist
+.env
