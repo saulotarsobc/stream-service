@@ -3,22 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Player HLS</title>
+    <title>Player HLS com Qualidade</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </head>
   <body>
     <h1>Aula 1 - HLS Player</h1>
     <video id="video" controls width="640" height="360"></video>
+    <div>
+      <label for="qualitySelector">Selecione a resolução:</label>
+      <select id="qualitySelector">
+        <option value="auto">Automática</option>
+      </select>
+    </div>
     <script>
       const video = document.getElementById("video");
-      const videoSrc = "http://localhost:3000/aulas/js/0001";
+      const qualitySelector = document.getElementById("qualitySelector");
+      const videoSrc = "http://localhost:3000/aulas/js/0001/master.m3u8";
 
       if (Hls.isSupported()) {
         const hls = new Hls();
+
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
+
+        // Popular as opções de resolução quando a playlist é carregada
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          const levels = hls.levels;
+          levels.forEach((level, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.text = `${level.height}p`;
+            qualitySelector.appendChild(option);
+          });
           video.play();
+        });
+
+        // Alterar a resolução ao selecionar
+        // qualitySelector.addEventListener("change", (event) => {
+        //   const value = event.target.value;
+
+        //   if (value === "auto") {
+        //     hls.currentLevel = -1; // Automático
+        //   } else {
+        //     hls.currentLevel = parseInt(value, 10); // Selecionar nível específico
+        //   }
+        // });
+
+        qualitySelector.addEventListener("change", (event) => {
+          const value = event.target.value;
+
+          if (value === "auto") {
+            hls.currentLevel = -1; // Automático
+          } else {
+            hls.currentLevel = parseInt(value, 10); // Selecionar nível específico
+          }
+
+          // Pausar o vídeo e limpar o buffer para evitar travamentos
+          video.pause();
+          hls.on(Hls.Events.LEVEL_SWITCHED, () => {
+            video.currentTime = video.currentTime; // Reseta o buffer no tempo atual
+            video.play(); // Retoma a reprodução
+          });
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = videoSrc;
