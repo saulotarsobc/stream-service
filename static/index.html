@@ -18,7 +18,7 @@
     <script>
       const video = document.getElementById("video");
       const qualitySelector = document.getElementById("qualitySelector");
-      const videoSrc = "http://localhost:3000/aulas/js/0001/master.m3u8";
+      const videoSrc = "http://localhost:3000/big_buck_bunny/intro";
 
       if (Hls.isSupported()) {
         const hls = new Hls();
@@ -26,7 +26,6 @@
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
 
-        // Popular as opções de resolução quando a playlist é carregada
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           const levels = hls.levels;
           levels.forEach((level, index) => {
@@ -38,31 +37,19 @@
           video.play();
         });
 
-        // Alterar a resolução ao selecionar
-        // qualitySelector.addEventListener("change", (event) => {
-        //   const value = event.target.value;
-
-        //   if (value === "auto") {
-        //     hls.currentLevel = -1; // Automático
-        //   } else {
-        //     hls.currentLevel = parseInt(value, 10); // Selecionar nível específico
-        //   }
-        // });
-
         qualitySelector.addEventListener("change", (event) => {
           const value = event.target.value;
 
           if (value === "auto") {
-            hls.currentLevel = -1; // Automático
+            hls.currentLevel = -1;
           } else {
-            hls.currentLevel = parseInt(value, 10); // Selecionar nível específico
+            hls.currentLevel = parseInt(value, 10);
           }
 
-          // Pausar o vídeo e limpar o buffer para evitar travamentos
           video.pause();
           hls.on(Hls.Events.LEVEL_SWITCHED, () => {
-            video.currentTime = video.currentTime; // Reseta o buffer no tempo atual
-            video.play(); // Retoma a reprodução
+            video.currentTime = video.currentTime;
+            video.play();
           });
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
