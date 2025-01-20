@@ -70,7 +70,7 @@ app.get("/stream/:curso/:aula/:quality", (req: Request, res: Response): any => {
 
 // Ex: /videos/big-buck-bunny/aula-2/medium/000.ts
 app.get(
-  "/videos/:curso/:aula/:quality/:segment",
+  "/stream/:curso/:aula/:quality/:segment",
   (req: Request, res: Response): any => {
     console.log(">>>>>> segment");
     const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/${req.params.segment}`;
