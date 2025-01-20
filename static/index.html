@@ -3,24 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Um player HLS interativo para aulas online."
+    />
+    <meta name="keywords" content="HLS, Player, Video, Streaming, Resolução" />
     <title>HLS Player - Aula 1</title>
     <link
       rel="icon"
       href="https://github.githubassets.com/images/icons/emoji/octocat.png"
       type="image/x-icon"
     />
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="hls.js" defer></script>
     <link rel="stylesheet" href="./main.css" />
   </head>
   <body>
-    <h1>Aula 1 - HLS Player</h1>
-    <video id="video" controls crossorigin="anonymous"></video>
-    <div>
-      <label for="qualitySelector">Selecione a resolução:</label>
-      <select id="qualitySelector">
-        <option value="auto">Automática</option>
-      </select>
-    </div>
-    <script src="./main.js"></script>
+    <header>
+      <h1>Aula 1 - HLS Player</h1>
+    </header>
+    <main>
+      <video
+        id="video"
+        controls
+        crossorigin="anonymous"
+        aria-label="Player de vídeo para a aula 1"
+        title="Player de vídeo"
+      ></video>
+      <div>
+        <label for="qualitySelector">Selecione a resolução:</label>
+        <select
+          id="qualitySelector"
+          aria-label="Selecione a qualidade do vídeo"
+        >
+          <option value="auto">Automática</option>
+        </select>
+      </div>
+    </main>
+    <footer>
+      <p>&copy; 2025 Aula HLS Player. Todos os direitos reservados.</p>
+    </footer>
+    <script src="./main.js" defer></script>
   </body>
 </html>
