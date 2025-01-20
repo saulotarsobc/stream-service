@@ -8,13 +8,13 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
-// Configuração do cliente MinIO
+// Configuração do cliente MinIO usando variáveis de ambiente
 const minioClient = new Minio.Client({
-  endPoint: "192.168.1.181",
-  port: 9000,
-  useSSL: false,
-  accessKey: "Enr30mBUBJLwrUcfpWd",
-  secretKey: "snmxrkeXtOMU7En57IzQxVG5UAi47eH5Ug1vFXlb",
+  endPoint: String(process.env.MINIO_ENDPOINT),
+  port: Number(process.env.MINIO_PORT),
+  useSSL: process.env.MINIO_USE_SSL == "1",
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
 });
 
 // Habilitar CORS

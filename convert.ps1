@@ -11,32 +11,31 @@ if (!(Test-Path -Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force
 }
 
-# Creia diferotios de resoluções
+# Cria diretórios de resoluções
 New-Item -ItemType Directory -Path "${outputDir}/low"
 New-Item -ItemType Directory -Path "${outputDir}/medium"
 New-Item -ItemType Directory -Path "${outputDir}/high"
 New-Item -ItemType Directory -Path "${outputDir}/full"
 
-
 # Comando ffmpeg para múltiplas resoluções
 ffmpeg -i $inputFile `
 -vf "scale=w=426:h=360:force_original_aspect_ratio=decrease" `
--c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 96k -hls_time 6 -hls_playlist_type vod `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 96k -hls_time 6 -hls_list_size 5 -hls_playlist_type vod `
 -hls_segment_filename "${outputDir}/low/%03d.ts" "${outputDir}/low/master.m3u8"
 
 ffmpeg -i $inputFile `
 -vf "scale=w=640:h=480:force_original_aspect_ratio=decrease" `
--c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 128k -hls_time 6 -hls_playlist_type vod `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 128k -hls_time 6 -hls_list_size 5 -hls_playlist_type vod `
 -hls_segment_filename "${outputDir}/medium/%03d.ts" "${outputDir}/medium/master.m3u8"
 
 ffmpeg -i $inputFile `
 -vf "scale=w=854:h=720:force_original_aspect_ratio=decrease" `
--c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 160k -hls_time 6 -hls_playlist_type vod `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 160k -hls_time 6 -hls_list_size 5 -hls_playlist_type vod `
 -hls_segment_filename "${outputDir}/high/%03d.ts" "${outputDir}/high/master.m3u8"
 
 ffmpeg -i $inputFile `
 -vf "scale=w=1920:h=1080:force_original_aspect_ratio=decrease" `
--c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 192k -hls_time 6 -hls_playlist_type vod `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 192k -hls_time 6 -hls_list_size 5 -hls_playlist_type vod `
 -hls_segment_filename "${outputDir}/full/%03d.ts" "${outputDir}/full/master.m3u8"
 
 # Criação do master playlist
