@@ -20,44 +20,64 @@ const minioClient = new Minio.Client({
 // Habilitar CORS
 app.use(cors());
 
+// Adicionar cabeçalhos CORS para permitir solicitações de diferentes origens
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
+
 // static files
 app.use(express.static("static"));
 
-// Função para buscar arquivos do MinIO
-const getFileFromMinio = async (
+// Função para gerar URLs assinadas do MinIO
+const getSignedUrlFromMinio = async (
   bucket: string,
   objectName: string,
   res: Response
 ) => {
   try {
-    const dataStream = await minioClient.getObject(bucket, objectName);
-    dataStream.pipe(res);
+    console.log(`Buscando: ${objectName}`);
+    const url = await minioClient.presignedUrl(
+      "GET",
+      bucket,
+      objectName,
+      2 * 60 * 60
+    ); // URL válida por 2 horas
+    res.redirect(url);
   } catch (err) {
     res.status(500).send(err);
   }
 };
 
-// /aulas/big-buck-bunny/aula-1
+// Ex: /aulas/big-buck-bunny/aula-1
 app.get("/aulas/:curso/:aula/", (_req: Request, res: Response): any => {
+  console.log(">>>>>> playlist master");
   const objectName = `${_req.params.curso}/${_req.params.aula}/master.m3u8`;
-  getFileFromMinio("videos", objectName, res);
+  getSignedUrlFromMinio("videos", objectName, res);
 });
 
-// /stream/big-buck-bunny/aula-1/low/000.ts
-app.get(
-  "/stream/:curso/:aula/:quality/:segment",
-  (req: Request, res: Response): any => {
-    const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/${req.params.segment}`;
+// Ex: /stream/big-buck-bunny/aula-1/low/
+app.get("/stream/:curso/:aula/:quality", (req: Request, res: Response): any => {
+  console.log(">>>>>> playlist de qualidade");
+  const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/master.m3u8`;
+  getSignedUrlFromMinio("videos", objectName, res);
+});
 
-    getFileFromMinio("videos", objectName, res);
+// Ex: /videos/big-buck-bunny/aula-2/medium/000.ts
+app.get(
+  "/videos/:curso/:aula/:quality/:segment",
+  (req: Request, res: Response): any => {
+    console.log(">>>>>> segment");
+    const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/${req.params.segment}`;
+    console.debug({ segment: objectName });
+    getSignedUrlFromMinio("videos", objectName, res);
   }
 );
-
-// /stream/big-buck-bunny/aula-1/low/
-app.get("/stream/:curso/:aula/:quality", (req: Request, res: Response): any => {
-  const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/master.m3u8`;
-  getFileFromMinio("videos", objectName, res);
-});
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);

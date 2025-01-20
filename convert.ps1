@@ -1,5 +1,5 @@
 $curso = "big-buck-bunny"
-$aula = "aula-2"
+$aula = "aula-1"
 $inputFile = "./videos/$curso/$aula.avi"
 $outputDir = "./temp/$curso/$aula"
 
@@ -39,16 +39,17 @@ ffmpeg -i $inputFile `
 -hls_segment_filename "${outputDir}/full/%03d.ts" "${outputDir}/full/master.m3u8"
 
 # Criação do master playlist
+$server = 'http://127.0.0.1:3000'
 $masterPlaylist = @"
 #EXTM3U
 #EXT-X-STREAM-INF:BANDWIDTH=400000,RESOLUTION=426x360
-http://127.0.0.1:3000/stream/$curso/$aula/low/
+$server/stream/$curso/$aula/low/
 #EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x480
-http://127.0.0.1:3000/stream/$curso/$aula/medium/
+$server/stream/$curso/$aula/medium/
 #EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=854x720
-http://127.0.0.1:3000/stream/$curso/$aula/high/
+$server/stream/$curso/$aula/high/
 #EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080
-http://127.0.0.1:3000/stream/$curso/$aula/full/
+$server/stream/$curso/$aula/full/
 "@
 
 Set-Content -Path "${outputDir}/master.m3u8" -Value $masterPlaylist
