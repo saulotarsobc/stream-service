@@ -1,7 +1,7 @@
 const video = document.getElementById("video");
 const qualitySelector = document.getElementById("qualitySelector");
 
-const videoSrc = "http://localhost:3000/stream/big-buck-bunny/aula-2";
+const videoSrc = "http://localhost:3000/stream/big-buck-bunny/aula-1";
 
 function initializeHls() {
   const hls = new Hls({

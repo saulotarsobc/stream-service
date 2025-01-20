@@ -1,6 +1,6 @@
 $curso = "big-buck-bunny"
-$aula = "aula-1"
-$inputFile = "./videos/$curso/$aula.avi"
+$aula = "aula-3"
+$inputFile = "./videos/$curso/$aula.mp4"
 $outputDir = "./temp/$curso/$aula"
 $server = 'http://127.0.0.1:3000'
 
