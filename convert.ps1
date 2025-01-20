@@ -2,7 +2,7 @@ $curso = "big-buck-bunny"
 $aula = "aula-3"
 $inputFile = "./videos/$curso/$aula.mp4"
 $outputDir = "./temp/$curso/$aula"
-$server = 'http://127.0.0.1:3000'
+$server = 'http://192.168.1.181:3000'
 
 # Remove all contents of $outputDir
 Remove-Item -Path "${outputDir}/*" -Recurse -Force
