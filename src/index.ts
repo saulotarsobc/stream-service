@@ -1,30 +1,63 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
-import { join } from "node:path";
+import { join } from "path";
 
 const app = express();
+const port = 3000;
+
+// Habilitar CORS
 app.use(cors());
 
-// Rota para servir os arquivos HLS de forma estática
-app.use(
-  "/big_buck_bunny/",
-  express.static(join(__dirname, "../temp/big_buck_bunny/intro"))
+// static files
+app.use(express.static("static"));
+
+// /aulas/big-buck-bunny/aula-1
+app.get("/aulas/:curso/:aula/", (_req: Request, res: Response): any => {
+  const file = join(
+    __dirname,
+    "../temp",
+    `${_req.params.curso}`,
+    `${_req.params.aula}`,
+    "master.m3u8"
+  );
+  res.sendFile(file);
+});
+
+// /stream/big-buck-bunny/aula-1/low/000.ts
+app.get(
+  "/stream/:curso/:aula/:quality/:segment",
+  (req: Request, res: Response): any => {
+    const file = join(
+      __dirname,
+      "../temp",
+      `${req.params.curso}`,
+      `${req.params.aula}`,
+      `${req.params.quality}`,
+      `${req.params.segment}`
+    );
+    res.sendFile(file);
+  }
 );
 
-// Página principal
-app.get("/", (_req: Request, res: Response) => {
-  res.sendFile(join(__dirname, "../static/index.html"));
-});
-
-// Rota para verificar a playlist
-app.get("/big_buck_bunny/intro", (_req: Request, res: Response) => {
-  const playlistPath = join(
+// /stream/big-buck-bunny/aula-1/low/
+app.get("/stream/:curso/:aula/:quality", (req: Request, res: Response): any => {
+  const file = join(
     __dirname,
-    "../temp/big_buck_bunny/intro/master.m3u8"
+    "../temp",
+    `${req.params.curso}`,
+    `${req.params.aula}`,
+    `${req.params.quality}`,
+    "master.m3u8"
   );
-  res.sendFile(playlistPath);
+
+  if (!file) {
+    console.error(req.params.quality);
+    res.status(404).send("Arquivo nao encontrado");
+  }
+
+  res.sendFile(file);
 });
 
-app.listen(3000, () => {
-  console.log("Servidor rodando em http://localhost:3000");
+app.listen(port, () => {
+  console.log(`Servidor rodando em http://localhost:${port}`);
 });

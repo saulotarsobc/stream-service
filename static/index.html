@@ -3,63 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Player HLS com Qualidade</title>
+    <title>HLS Player - Aula 1</title>
+    <link
+      rel="icon"
+      href="https://github.githubassets.com/images/icons/emoji/octocat.png"
+      type="image/x-icon"
+    />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="./main.css" />
   </head>
   <body>
     <h1>Aula 1 - HLS Player</h1>
-    <video id="video" controls width="640" height="360"></video>
+    <video id="video" controls crossorigin="anonymous"></video>
     <div>
       <label for="qualitySelector">Selecione a resolução:</label>
       <select id="qualitySelector">
         <option value="auto">Automática</option>
       </select>
     </div>
-    <script>
-      const video = document.getElementById("video");
-      const qualitySelector = document.getElementById("qualitySelector");
-      const videoSrc = "http://localhost:3000/big_buck_bunny/intro";
-
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          const levels = hls.levels;
-          levels.forEach((level, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.text = `${level.height}p`;
-            qualitySelector.appendChild(option);
-          });
-          video.play();
-        });
-
-        qualitySelector.addEventListener("change", (event) => {
-          const value = event.target.value;
-
-          if (value === "auto") {
-            hls.currentLevel = -1;
-          } else {
-            hls.currentLevel = parseInt(value, 10);
-          }
-
-          video.pause();
-          hls.on(Hls.Events.LEVEL_SWITCHED, () => {
-            video.currentTime = video.currentTime;
-            video.play();
-          });
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = videoSrc;
-        video.addEventListener("loadedmetadata", () => {
-          video.play();
-        });
-      } else {
-        alert("Seu navegador não suporta HLS.");
-      }
-    </script>
+    <script src="./main.js"></script>
   </body>
 </html>

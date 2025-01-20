@@ -1,75 +1,57 @@
-$caminhoDoArquivo = "./videos/big-buck-bunny/aula-1.avi"
-$destino = "./temp"
-$slugDoCurso = "big-buck-bunny"
-$slugDaAula = "aula-1"
+$curso = "big-buck-bunny"
+$aula = "aula-2"
+$inputFile = "./videos/$curso/$aula.avi"
+$outputDir = "./temp/$curso/$aula"
 
-# Deletar destino
-if (Test-Path -Path $destino) {
-    Remove-Item -Path $destino -Recurse -Force
+# Remove all contents of $outputDir
+Remove-Item -Path "${outputDir}/*" -Recurse -Force
+
+# Verifica e cria o diretório de saída, se necessário
+if (!(Test-Path -Path $outputDir)) {
+    New-Item -ItemType Directory -Path $outputDir -Force
 }
 
-# Criar destino
-New-Item -Path $destino -ItemType Directory
+# Creia diferotios de resoluções
+New-Item -ItemType Directory -Path "${outputDir}/low"
+New-Item -ItemType Directory -Path "${outputDir}/medium"
+New-Item -ItemType Directory -Path "${outputDir}/high"
+New-Item -ItemType Directory -Path "${outputDir}/full"
 
-if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
-    Write-Host "ffmpeg não encontrado. Por favor, instale-o ou adicione-o ao PATH do sistema." -ForegroundColor Red
-    exit
-}
 
-function Invoke-Converter-ParaHLS {
-    param (
-        [string]$resolucao,
-        [string]$prefixo,
-        [string]$bitrate
-    )
+# Comando ffmpeg para múltiplas resoluções
+ffmpeg -i $inputFile `
+-vf "scale=w=426:h=360:force_original_aspect_ratio=decrease" `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 96k -hls_time 6 -hls_playlist_type vod `
+-hls_segment_filename "${outputDir}/low/%03d.ts" "${outputDir}/low/master.m3u8"
 
-    $dimensao = $resolucao.Split(":")
-    $largura = $dimensao[0]
-    $altura = $dimensao[1]
+ffmpeg -i $inputFile `
+-vf "scale=w=640:h=480:force_original_aspect_ratio=decrease" `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 128k -hls_time 6 -hls_playlist_type vod `
+-hls_segment_filename "${outputDir}/medium/%03d.ts" "${outputDir}/medium/master.m3u8"
 
-    ffmpeg -i $caminhoDoArquivo -vf "scale=w=${largura}:h=${altura}:force_original_aspect_ratio=decrease" `
-        -c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a $bitrate -hls_time 6 -hls_playlist_type vod `
-        -hls_segment_filename "${destino}/${slugDoCurso}-${slugDaAula}-${prefixo}-%03d.ts" -f hls "${destino}/${slugDoCurso}-${slugDaAula}-${prefixo}.m3u8"
+ffmpeg -i $inputFile `
+-vf "scale=w=854:h=720:force_original_aspect_ratio=decrease" `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 160k -hls_time 6 -hls_playlist_type vod `
+-hls_segment_filename "${outputDir}/high/%03d.ts" "${outputDir}/high/master.m3u8"
 
-        if ($?) {
-        Write-Host "Conversão para $prefixo realizada com sucesso!" -ForegroundColor Green
-    } else {
-        Write-Host "Erro ao executar o ffmpeg para $prefixo" -ForegroundColor Red
-    }
+ffmpeg -i $inputFile `
+-vf "scale=w=1920:h=1080:force_original_aspect_ratio=decrease" `
+-c:v libx264 -preset veryfast -crf 23 -c:a aac -b:a 192k -hls_time 6 -hls_playlist_type vod `
+-hls_segment_filename "${outputDir}/full/%03d.ts" "${outputDir}/full/master.m3u8"
 
-    return @{ prefixo = $prefixo; resolucao = "${largura}x${altura}"; bandwidth = $bitrate }
-}
+# Criação do master playlist
+$masterPlaylist = @"
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=400000,RESOLUTION=426x360
+http://127.0.0.1:3000/stream/$curso/$aula/low/
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x480
+http://127.0.0.1:3000/stream/$curso/$aula/medium/
+#EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=854x720
+http://127.0.0.1:3000/stream/$curso/$aula/high/
+#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080
+http://127.0.0.1:3000/stream/$curso/$aula/full/
+"@
 
-if (-not (Test-Path $caminhoDoArquivo)) {
-    Write-Host "Arquivo de vídeo não encontrado: $caminhoDoArquivo" -ForegroundColor Red
-    exit
-}
+Set-Content -Path "${outputDir}/master.m3u8" -Value $masterPlaylist
 
-$resolucoes = @(
-    @{resolucao="426:360"; prefixo="low"; bitrate="96k"}
-    # @{resolucao="640:480"; prefixo="medium"; bitrate="128k"},
-    # @{resolucao="854:720"; prefixo="high"; bitrate="160k"},
-    # @{resolucao="1920:1080"; prefixo="full"; bitrate="192k"}
-)
-
-$streamInfo = @()
-foreach ($resolucao in $resolucoes) {
-    $streamInfo += Invoke-Converter-ParaHLS -resolucao $resolucao.resolucao -prefixo $resolucao.prefixo -bitrate $resolucao.bitrate
-}
-
-$masterPlaylist = "#EXTM3U`n"
-
-foreach ($stream in $streamInfo) {
-    if ($stream.bandwidth -and $stream.resolucao -and $stream.prefixo) {
-        $masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=$($stream.bandwidth),RESOLUTION=$($stream.resolucao)`n"
-        $masterPlaylist += "${slugDoCurso}-${slugDaAula}-${stream.prefixo}.m3u8`n"
-    } else {
-        Write-Host "Erro: Falta informação em algum campo para o stream com resolução $($stream.resolucao)"
-    }
-}
-
-$masterPlaylistPath = Join-Path -Path $destino -ChildPath "${slugDoCurso}-${slugDaAula}.m3u8"
-Set-Content -Path $masterPlaylistPath -Value $masterPlaylist
-
-Write-Host "Conversão para HLS concluída. Arquivos disponíveis na pasta ${destino}/${slugDoCurso}/${slugDaAula}." -ForegroundColor Green
-Write-Host "Arquivo master.m3u8 disponível em ${destinoCompleto}/master.m3u8." -ForegroundColor Green
+Write-Host "Conversão para HLS concluída. Arquivos disponíveis na pasta $outputDir."
