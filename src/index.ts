@@ -38,47 +38,41 @@ app.use(express.static("static"));
 const getSignedUrlFromMinio = async (
   bucket: string,
   objectName: string,
-  res: Response
+  res: Response,
+  expires: number = 300 // Valor padrão de 5 minutos
 ) => {
   try {
-    console.log(`Buscando: ${objectName}`);
     const url = await minioClient.presignedUrl(
       "GET",
       bucket,
       objectName,
-      2 * 60 * 60
-    ); // URL válida por 2 horas
+      expires
+    );
     res.redirect(url);
   } catch (err) {
     res.status(500).send(err);
   }
 };
 
-// Ex: /aulas/big-buck-bunny/aula-1
-app.get("/aulas/:curso/:aula/", (_req: Request, res: Response): any => {
-  console.log(">>>>>> playlist master");
+// Ex: /stream/big-buck-bunny/aula-1
+app.get("/stream/:curso/:aula/", (_req: Request, res: Response): any => {
   const objectName = `${_req.params.curso}/${_req.params.aula}/master.m3u8`;
-  getSignedUrlFromMinio("videos", objectName, res);
+  getSignedUrlFromMinio("videos", objectName, res, 300);
 });
 
 // Ex: /stream/big-buck-bunny/aula-1/low/
 app.get("/stream/:curso/:aula/:quality", (req: Request, res: Response): any => {
-  console.log(">>>>>> playlist de qualidade");
   const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/master.m3u8`;
-  getSignedUrlFromMinio("videos", objectName, res);
+  getSignedUrlFromMinio("videos", objectName, res, 300);
 });
 
-// Ex: /videos/big-buck-bunny/aula-2/medium/000.ts
+// Ex: /stream/big-buck-bunny/aula-2/medium/000.ts
 app.get(
   "/stream/:curso/:aula/:quality/:segment",
   (req: Request, res: Response): any => {
-    console.log(">>>>>> segment");
     const objectName = `${req.params.curso}/${req.params.aula}/${req.params.quality}/${req.params.segment}`;
-    console.debug({ segment: objectName });
-    getSignedUrlFromMinio("videos", objectName, res);
+    getSignedUrlFromMinio("videos", objectName, res, 300);
   }
 );
 
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
-});
+app.listen(port, () => {});

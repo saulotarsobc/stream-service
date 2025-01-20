@@ -1,12 +1,3 @@
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Docker Compose reference guide at
-# https://docs.docker.com/go/compose-spec-reference/
-
-# Here the instructions define your application as a service called "server".
-# This service is built from the Dockerfile in the current directory.
-# You can add other services your application may depend on here, such as a
-# database or a cache. For examples, see the Awesome Compose repository:
-# https://github.com/docker/awesome-compose
 services:
   servidor-frontend:
     build:
@@ -29,20 +20,6 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - minio:/data
+      - ./data/minio:/data
     command: server /data --console-address ":9001"
     restart: unless-stopped
-
-volumes:
-  server-volume:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./data/server
-      o: bind
-  minio:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./data/minio
-      o: bind
