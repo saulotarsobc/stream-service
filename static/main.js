@@ -2,7 +2,7 @@ const video = document.getElementById("video");
 const qualitySelector = document.getElementById("qualitySelector");
 const loadingIndicator = document.getElementById("loadingIndicator");
 
-const videoSrc = "http://192.168.1.181:3000/stream/big-buck-bunny/aula-3";
+const videoSrc = "http://192.168.1.181:3000/stream/big-buck-bunny/aula-1";
 
 /**
  * Inicializa o HLS e configura eventos necessários.

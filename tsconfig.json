@@ -1,5 +1,5 @@
 {
-  "exclude": ["node_modules", "temp", "dist"],
+  "exclude": ["node_modules", "temp", "dist", "scripts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
