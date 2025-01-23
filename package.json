@@ -6,6 +6,7 @@
     "dev": "tsx --watch src/index.ts",
     "build": "tsc",
     "convert": "tsx ./scripts/convert.ts",
+    "convert:gpu": "tsx ./scripts/convert_cuda.ts",
     "start": "node dist/index.js"
   },
   "keywords": [],
