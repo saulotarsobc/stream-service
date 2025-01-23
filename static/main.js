@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "airplay",
         "chapters",
         "descriptions",
+        "caption",
       ];
 
       defaultOptions.quality = {
@@ -39,6 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
         options: availableQualities,
         forced: true,
         onChange: (newQuality) => changeQuality(newQuality),
+      };
+      defaultOptions.captions = {
+        active: true, // Ativar legendas por padrão
+        update: true, // Atualizar automaticamente quando as legendas mudam
+        language: "pt", // Idioma padrão
       };
 
       new Plyr(video, defaultOptions);
