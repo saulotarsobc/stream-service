@@ -1,3 +1,4 @@
+import cliProgress from "cli-progress";
 import ffmpeg from "fluent-ffmpeg";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -15,11 +16,27 @@ type resolutionType = {
   height: number;
 };
 
+const progressBars = new cliProgress.MultiBar(
+  {
+    clearOnComplete: true,
+    hideCursor: true,
+    format:
+      "{name} [{bar}] | {percentage}%/{total} | frames:{frames} | fps:{currentFps} | {timemark}",
+  },
+  cliProgress.Presets.shades_classic
+);
+
+// Inicializar barras de progresso para cada resolução
+const progressBar = progressBars.create(100, 0, {
+  name: "Progresso",
+  percentage: 0,
+  timemark: "00:00:00",
+  currentFps: 0,
+});
+
 // Função para limpar o diretório de saída
 const clearOutputDir = (dir: string) => {
-  if (existsSync(dir)) {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
 };
 
@@ -66,15 +83,17 @@ function createHLS(
       ])
       .output(join(outputPath, "master.m3u8"))
       .on("progress", (progress) => {
-        console.log(
-          `Resolução: ${resolution.width}x${resolution.height} | Progresso: ${
-            progress.percent?.toFixed(2) || 0
-          }% : ${progress.timemark} | FPS: ${progress.currentFps}FPS`
-        );
+        progressBar.update(progress.percent || 0, {
+          percentage: progress.percent?.toFixed(2) || 0,
+          timemark: progress.timemark,
+          frames: progress.frames || 0,
+          total: 100,
+          currentFps: progress.currentFps || 0,
+        });
       })
-      .on("start", (commandLine) => {
-        console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
-      })
+      // .on("start", (commandLine) => {
+      //   console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
+      // })
       .on("end", () => {
         console.log(`Resolução ${resolution.width}x${resolution.height}: 100%`);
         resolve(true);
