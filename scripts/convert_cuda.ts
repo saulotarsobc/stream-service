@@ -54,7 +54,7 @@ function createHLS(
       .outputOptions([
         `-vf scale=w=${resolution.width}:h=${resolution.height}:force_original_aspect_ratio=decrease`, // Usa escala padrão na CPU
         `-c:v h264_nvenc`, // Usa NVENC (GPU) para codificação de vídeo
-        `-preset fast`, // Define o preset rápido para teste
+        `-preset slow`, // Define o preset rápido para teste
         `-cq:v 23`, // Qualidade constante padrão para NVENC
         `-c:a aac`, // Codificação de áudio AAC
         `-b:a ${bitrate}`, // Bitrate do áudio
@@ -67,13 +67,13 @@ function createHLS(
       .output(join(outputPath, "master.m3u8"))
       .on("progress", (progress) => {
         console.log(
-          `Resolução ${resolution.width}x${resolution.height}: ${
+          `Resolução: ${resolution.width}x${resolution.height} | Progresso: ${
             progress.percent?.toFixed(2) || 0
-          }% : ${progress.timemark}`
+          }% : ${progress.timemark} | FPS: ${progress.currentFps}FPS`
         );
       })
       .on("start", (commandLine) => {
-        console.log("Comando FFmpeg:", commandLine);
+        console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
       })
       .on("end", () => {
         console.log(`Resolução ${resolution.width}x${resolution.height}: 100%`);
@@ -90,28 +90,28 @@ function createHLS(
   createResolutionDirs(outputDir, ["low", "medium", "high", "full"]);
 
   try {
-    createHLS(
+    await createHLS(
       inputFile,
       { width: 426, height: 360 },
       "96k",
       `${outputDir}/low`,
       `${server}/segment/${curso}/${aula}/low/`
     );
-    createHLS(
+    await createHLS(
       inputFile,
       { width: 640, height: 480 },
       "128k",
       `${outputDir}/medium`,
       `${server}/segment/${curso}/${aula}/medium/`
     );
-    createHLS(
+    await createHLS(
       inputFile,
       { width: 854, height: 720 },
       "160k",
       `${outputDir}/high`,
       `${server}/segment/${curso}/${aula}/high/`
     );
-    createHLS(
+    await createHLS(
       inputFile,
       { width: 1920, height: 1080 },
       "192k",
