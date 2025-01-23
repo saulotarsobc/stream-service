@@ -4,7 +4,7 @@ import { join } from "path";
 
 const curso = "big-buck-bunny";
 const aula = "aula-1";
-const inputFile = join(__dirname, "..", "videos", curso, `${aula}.avi`);
+const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
 const server = "http://192.168.1.181:3000";
 const hls_time = 10;

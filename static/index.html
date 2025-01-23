@@ -14,34 +14,20 @@
       href="https://github.githubassets.com/images/icons/emoji/octocat.png"
       type="image/x-icon"
     />
-    <script type="module" src="hls.js" defer></script>
-    <link rel="stylesheet" href="./main.css" />
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.4/plyr.css" />
   </head>
   <body>
     <header>
       <h1>Aula 1 - HLS Player</h1>
     </header>
     <main>
-      <video
-        id="video"
-        controls
-        crossorigin="anonymous"
-        aria-label="Player de vídeo para a aula 1"
-        title="Player de vídeo"
-      ></video>
-      <div>
-        <label for="qualitySelector">Selecione a resolução:</label>
-        <select
-          id="qualitySelector"
-          aria-label="Selecione a qualidade do vídeo"
-        >
-          <option value="auto">Automática</option>
-        </select>
-      </div>
+      <video id="video" controls></video>
     </main>
-    <footer>
-      <p>&copy; 2025 Aula HLS Player. Todos os direitos reservados.</p>
-    </footer>
+
+    <div id="player"></div>
+
+    <script src="./hls.js" defer></script>
+    <script src="./plyr.js"></script>
     <script src="./main.js" defer></script>
   </body>
 </html>
