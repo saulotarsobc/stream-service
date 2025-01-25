@@ -3,8 +3,8 @@ import ffmpeg from "fluent-ffmpeg";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const curso = "big-buck-bunny";
-const aula = "aula-1";
+const curso = "css";
+const aula = "001-backgroun-origin";
 const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
 const server = "http://192.168.1.181:3000";

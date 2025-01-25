@@ -1,7 +1,7 @@
 const video = document.getElementById("video");
 
 document.addEventListener("DOMContentLoaded", () => {
-  const source = "http://192.168.1.181:3000/stream/big-buck-bunny/aula-1";
+  const source = "http://192.168.1.181:3000/stream/css/001-backgroun-origin";
   const defaultOptions = {};
 
   if (Hls.isSupported()) {
@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         forced: true,
         onChange: (newQuality) => changeQuality(newQuality),
       };
+
       defaultOptions.captions = {
         active: true, // Ativar legendas por padrão
         update: true, // Atualizar automaticamente quando as legendas mudam
