@@ -1,7 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import cliProgress from "cli-progress";
 import ffmpeg from "fluent-ffmpeg";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
+import { bucket } from "./bucket";
 
 const curso = "mysql";
 const aula = "aula-1";
@@ -10,6 +14,8 @@ const outputDir = join(__dirname, "..", "temp", curso, aula);
 const server = "http://192.168.1.181:3000";
 const hls_time = 10;
 const hls_list_size = 0;
+const bucketName = "videos";
+const resolutions = ["low", "medium", "high", "full"];
 
 type resolutionType = {
   width: number;
@@ -105,40 +111,64 @@ function createHLS(
   });
 }
 
+/**
+ *
+ * @param bucketName
+ * @param filePath
+ * @param key
+ */
+const uploadFile = async (
+  bucketName: string,
+  filePath: string,
+  key: string
+) => {
+  try {
+    await bucket.fPutObject(bucketName, key, filePath, {});
+    console.log(`Arquivo enviado com sucesso: ${key}`);
+  } catch (err) {
+    console.error(`Erro ao enviar ${key}:`, err.message);
+  }
+};
+
 // Função principal
 (async () => {
   clearOutputDir(outputDir);
-  createResolutionDirs(outputDir, ["low", "medium", "high", "full"]);
+  // createResolutionDirs(outputDir, resolutions);
+  createResolutionDirs(outputDir, resolutions);
 
   try {
-    await createHLS(
-      inputFile,
-      { width: 426, height: 360 },
-      "96k",
-      `${outputDir}/low`,
-      `${server}/segment/${curso}/${aula}/low/`
-    );
-    await createHLS(
-      inputFile,
-      { width: 640, height: 480 },
-      "128k",
-      `${outputDir}/medium`,
-      `${server}/segment/${curso}/${aula}/medium/`
-    );
-    await createHLS(
-      inputFile,
-      { width: 854, height: 720 },
-      "160k",
-      `${outputDir}/high`,
-      `${server}/segment/${curso}/${aula}/high/`
-    );
-    await createHLS(
-      inputFile,
-      { width: 1920, height: 1080 },
-      "192k",
-      `${outputDir}/full`,
-      `${server}/segment/${curso}/${aula}/full/`
-    );
+    await Promise.all([
+      createHLS(
+        inputFile,
+        { width: 426, height: 360 },
+        "96k",
+        `${outputDir}/low`,
+        `${server}/segment/${curso}/${aula}/low/`
+      ),
+      createHLS(
+        inputFile,
+        { width: 640, height: 480 },
+        "128k",
+        `${outputDir}/medium`,
+        `${server}/segment/${curso}/${aula}/medium/`
+      ),
+      createHLS(
+        inputFile,
+        { width: 854, height: 720 },
+        "160k",
+        `${outputDir}/high`,
+        `${server}/segment/${curso}/${aula}/high/`
+      ),
+      createHLS(
+        inputFile,
+        { width: 1920, height: 1080 },
+        "192k",
+        `${outputDir}/full`,
+        `${server}/segment/${curso}/${aula}/full/`
+      ),
+    ]).then(() => {
+      console.log("Arquivos HLS criados com sucesso");
+    });
 
     // Criação do master playlist
     const masterPlaylist = `#EXTM3U
@@ -153,6 +183,51 @@ ${server}/resolution/${curso}/${aula}/full/
 `;
 
     writeFileSync(join(outputDir, "master.m3u8"), masterPlaylist, "utf-8");
+
+    // enviar arquivo master
+    uploadFile(
+      bucketName,
+      join(outputDir, "master.m3u8"),
+      `${curso}/${aula}/master.m3u8`
+    )
+      .then(() => {
+        console.log("Master playlist enviada com sucesso");
+      })
+      .catch((err) => console.error(`Erro ao enviar master:`, err.message));
+
+    // enviar resulucoes
+    for (const resolution of resolutions) {
+      uploadFile(
+        bucketName,
+        join(outputDir, resolution, "master.m3u8"),
+        `${curso}/${aula}/${resolution}/master.m3u8`
+      )
+        .then(() => {
+          console.log(`Resolução ${resolution} enviada com sucesso`);
+        })
+        .catch((err) =>
+          console.error(`Erro ao enviar ${resolution}:`, err.message)
+        );
+
+      // listar todos os segmentos em cada diretorio de resolução
+      const segments = readdirSync(join(outputDir, resolution)).filter((file) =>
+        file.endsWith(".ts")
+      );
+
+      for (const segment of segments) {
+        uploadFile(
+          bucketName,
+          join(outputDir, resolution, segment),
+          `${curso}/${aula}/${resolution}/${segment}`
+        )
+          .then(() => {
+            console.log(`Segmento ${segment} enviado com sucesso`);
+          })
+          .catch((err) =>
+            console.error(`Erro ao enviar ${segment}:`, err.message)
+          );
+      }
+    }
   } catch (error) {
     console.error("Erro durante a conversão:", error);
   }
