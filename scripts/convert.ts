@@ -1,8 +1,9 @@
+import cliProgress from "cli-progress";
 import ffmpeg from "fluent-ffmpeg";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const curso = "big-buck-bunny";
+const curso = "mysql";
 const aula = "aula-1";
 const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
@@ -15,11 +16,27 @@ type resolutionType = {
   height: number;
 };
 
+const progressBars = new cliProgress.MultiBar(
+  {
+    clearOnComplete: true,
+    hideCursor: true,
+    format:
+      "{name} [{bar}] | {percentage}%/{total} | frames:{frames} | fps:{currentFps} | {timemark}",
+  },
+  cliProgress.Presets.shades_classic
+);
+
+// Inicializar barras de progresso para cada resolução
+const progressBar = progressBars.create(100, 0, {
+  name: "Progresso",
+  percentage: 0,
+  timemark: "00:00:00",
+  currentFps: 0,
+});
+
 // Função para limpar o diretório de saída
 const clearOutputDir = (dir: string) => {
-  if (existsSync(dir)) {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
 };
 
@@ -52,26 +69,31 @@ function createHLS(
   return new Promise((resolve, reject): void => {
     ffmpeg(input)
       .outputOptions([
-        `-vf scale=w=${resolution.width}:h=${resolution.height}:force_original_aspect_ratio=decrease`,
-        `-c:v libx264`,
-        `-preset veryfast`,
-        `-crf 23`,
-        `-c:a aac`,
-        `-b:a ${bitrate}`,
-        `-hls_time ${hls_time}`,
-        `-hls_list_size ${hls_list_size}`,
-        `-hls_playlist_type vod`,
-        `-hls_base_url ${baseUrl}`,
-        `-hls_segment_filename ${join(outputPath, "%03d.ts")}`,
+        `-vf scale=w=${resolution.width}:h=${resolution.height}:force_original_aspect_ratio=decrease`, // Usa escala padrão na CPU
+        `-c:v libx264`, // Usa NVENC (GPU) para codificação de vídeo ou a padrão `-c:v libx264`
+        `-preset slow`, // Define o preset rápido para teste
+        `-cq:v 23`, // Qualidade constante padrão para NVENC
+        `-c:a aac`, // Codificação de áudio AAC
+        `-b:a ${bitrate}`, // Bitrate do áudio
+        `-hls_time ${hls_time}`, // Duração dos segmentos HLS
+        `-hls_list_size ${hls_list_size}`, // Tamanho da lista de segmentos
+        `-hls_playlist_type vod`, // Define o tipo de playlist HLS
+        `-hls_base_url ${baseUrl}`, // URL base dos segmentos HLS
+        `-hls_segment_filename ${join(outputPath, "%03d.ts")}`, // Formato do nome dos segmentos
       ])
       .output(join(outputPath, "master.m3u8"))
       .on("progress", (progress) => {
-        console.log(
-          `Resolução ${resolution.width}x${resolution.height}: ${
-            progress.percent?.toFixed(2) || 0
-          }% : ${progress.timemark}`
-        );
+        progressBar.update(progress.percent || 0, {
+          percentage: progress.percent?.toFixed(2) || 0,
+          timemark: progress.timemark,
+          frames: progress.frames || 0,
+          total: 100,
+          currentFps: progress.currentFps || 0,
+        });
       })
+      // .on("start", (commandLine) => {
+      //   console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
+      // })
       .on("end", () => {
         console.log(`Resolução ${resolution.width}x${resolution.height}: 100%`);
         resolve(true);
@@ -129,9 +151,6 @@ ${server}/resolution/${curso}/${aula}/full/
 `;
 
     writeFileSync(join(outputDir, "master.m3u8"), masterPlaylist, "utf-8");
-    console.log(
-      `Conversão para HLS concluída. Arquivos disponíveis na pasta ${outputDir}`
-    );
   } catch (error) {
     console.error("Erro durante a conversão:", error);
   }
