@@ -3,3 +3,5 @@
 /dist
 .env
 **/data
+scripts/convert_cuda.js
+scripts/convert.js

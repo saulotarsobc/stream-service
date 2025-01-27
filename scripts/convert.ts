@@ -7,7 +7,7 @@ const curso = "mysql";
 const aula = "aula-1";
 const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
-const server = "http://138.94.39.32:3001";
+const server = "http://192.168.1.181:3000";
 const hls_time = 10;
 const hls_list_size = 0;
 
@@ -91,11 +91,13 @@ function createHLS(
           currentFps: progress.currentFps || 0,
         });
       })
-      // .on("start", (commandLine) => {
-      //   console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
-      // })
+      .on("start", (commandLine) => {
+        console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
+      })
       .on("end", () => {
-        console.log(`Resolução ${resolution.width}x${resolution.height}: 100%`);
+        console.log(
+          `\nResolução ${resolution.width}x${resolution.height}: 100%`
+        );
         resolve(true);
       })
       .on("error", reject)

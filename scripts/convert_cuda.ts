@@ -3,8 +3,8 @@ import ffmpeg from "fluent-ffmpeg";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const curso = "css";
-const aula = "001-backgroun-origin";
+const curso = "mysql";
+const aula = "aula-1";
 const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
 const server = "http://192.168.1.181:3000";
@@ -35,13 +35,13 @@ const progressBar = progressBars.create(100, 0, {
 });
 
 // Função para limpar o diretório de saída
-const clearOutputDir = (dir: string) => {
+const clearOutputDir = (dir: string): void => {
   if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
 };
 
 // Criação dos diretórios de resoluções
-const createResolutionDirs = (baseDir: string, resolutions: string[]) => {
+const createResolutionDirs = (baseDir: string, resolutions: string[]): void => {
   resolutions.forEach((res: string) => {
     const dir = join(baseDir, res);
     if (!existsSync(dir)) {
@@ -65,7 +65,7 @@ function createHLS(
   bitrate: string,
   outputPath: string,
   baseUrl: string
-) {
+): Promise<void> {
   return new Promise((resolve, reject): void => {
     ffmpeg(input)
       .outputOptions([
@@ -91,14 +91,16 @@ function createHLS(
           currentFps: progress.currentFps || 0,
         });
       })
-      // .on("start", (commandLine) => {
-      //   console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
-      // })
-      .on("end", () => {
-        console.log(`Resolução ${resolution.width}x${resolution.height}: 100%`);
-        resolve(true);
+      .on("start", (commandLine) => {
+        console.log("\nComando FFmpeg:\n", commandLine, "\n\n");
       })
-      .on("error", reject)
+      .on("end", () => {
+        console.log(
+          `\nResolução ${resolution.width}x${resolution.height}: 100%`
+        );
+        resolve();
+      })
+      .on("error", () => reject())
       .run();
   });
 }

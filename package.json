@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "tsx --watch src/index.ts",
     "build": "tsc",
-    "convert": "tsx ./scripts/convert.ts",
-    "convert:gpu": "tsx ./scripts/convert_cuda.ts",
+    "preconvert": "tsc ./scripts/convert.ts -esModuleInterop",
+    "convert": "node ./scripts/convert.js",
+    "preconvert:gpu": "tsc ./scripts/convert_cuda.ts -esModuleInterop",
+    "convert:gpu": "node ./scripts/convert_cuda.js",
     "start": "node dist/index.js"
   },
   "keywords": [],

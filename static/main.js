@@ -1,7 +1,7 @@
 const video = document.getElementById("video");
 
 document.addEventListener("DOMContentLoaded", () => {
-  const source = "http://192.168.1.181:3000/stream/css/001-backgroun-origin";
+  const source = "http://192.168.1.181:3000/stream/mysql/aula-1";
   const defaultOptions = {};
 
   if (Hls.isSupported()) {
