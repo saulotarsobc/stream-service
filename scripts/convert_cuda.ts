@@ -9,7 +9,7 @@ import { join } from "path";
 import { bucket } from "./bucket";
 
 const curso = "mysql";
-const aula = "aula-0";
+const aula = "aula-1";
 const inputFile = join(__dirname, "..", "videos", curso, `${aula}.mp4`);
 const outputDir = join(__dirname, "..", "temp", curso, aula);
 const server = "http://192.168.1.181:3000";
@@ -23,11 +23,13 @@ type Resolution = {
   height: number;
 };
 
+// Configuração do MultiBar para conversão, agora exibindo também timemark e frames.
 const conversionBars = new cliProgress.MultiBar(
   {
     clearOnComplete: true,
     hideCursor: true,
-    format: "{name} | {bar} | {percentage}%",
+    format:
+      "{name} | {bar} | {percentage}% | frames: {frames} | time: {timemark}",
   },
   cliProgress.Presets.shades_classic
 );
@@ -55,6 +57,10 @@ async function createResolutionDirs(
   }
 }
 
+/**
+ * Converte o vídeo de entrada para HLS com os parâmetros informados.
+ * Atualiza a barra de progresso com percent, frames e timemark.
+ */
 function createHLS(
   input: string,
   resolution: Resolution,
@@ -80,13 +86,19 @@ function createHLS(
       ])
       .output(join(outputPath, "master.m3u8"))
       .on("progress", (progressData) => {
-        // Se estiver muito próximo de 100%, forçamos o 100%
+        // Se estiver muito próximo de 100%, forçamos 100%
         let percent = progressData.percent || 0;
         if (percent >= 99.5) percent = 100;
-        progress.update(percent);
+        progress.update(percent, {
+          frames: progressData.currentFps || 0,
+          timemark: progressData.timemark || "00:00:00.0",
+        });
       })
       .on("end", () => {
-        progress.update(100);
+        progress.update(100, {
+          frames: "done",
+          timemark: "done",
+        });
         progress.stop();
         resolve();
       })
@@ -109,11 +121,9 @@ async function uploadFile(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const stream = createReadStream(filePath);
-
     stream.on("error", (error) => {
       reject(error);
     });
-
     bucket
       .putObject(bucketName, key, stream)
       .then(() => {
@@ -148,10 +158,26 @@ interface UploadFile {
 
   try {
     // Cria barras de conversão individuais para cada resolução
-    const progressLow = conversionBars.create(100, 0, { name: "low    " });
-    const progressMedium = conversionBars.create(100, 0, { name: "medium " });
-    const progressHigh = conversionBars.create(100, 0, { name: "high   " });
-    const progressFull = conversionBars.create(100, 0, { name: "full   " });
+    const progressLow = conversionBars.create(100, 0, {
+      name: "low    ",
+      frames: 0,
+      timemark: "00:00:00.0",
+    });
+    const progressMedium = conversionBars.create(100, 0, {
+      name: "medium ",
+      frames: 0,
+      timemark: "00:00:00.0",
+    });
+    const progressHigh = conversionBars.create(100, 0, {
+      name: "high   ",
+      frames: 0,
+      timemark: "00:00:00.0",
+    });
+    const progressFull = conversionBars.create(100, 0, {
+      name: "full   ",
+      frames: 0,
+      timemark: "00:00:00.0",
+    });
 
     // Executa as conversões em paralelo
     await Promise.all([
@@ -187,11 +213,11 @@ interface UploadFile {
         `${server}/segment/${curso}/${aula}/full/`,
         progressFull
       ),
-    ]).then(() => {
+    ]);
+
+    await setTimeout(2000).then(() => {
       console.log("\n\nConversão de todas as resoluções concluída.\n\n");
     });
-
-    await setTimeout(2000);
 
     // Cria o master playlist (playlist principal)
     const masterPlaylist = `#EXTM3U
