@@ -123,8 +123,6 @@ async function uploadFile(
       .catch((err: any) => {
         reject(err);
       });
-    console.log(`Arquivo enviado com sucesso: ${key}`);
-    resolve();
   });
 }
 
@@ -235,12 +233,7 @@ ${server}/resolution/${curso}/${aula}/full/
       }
     }
 
-    // Calcula o tamanho total dos arquivos a serem enviados
-    const statsArray = await Promise.all(
-      filesToUpload.map((f) => fsPromises.stat(f.local))
-    );
-
-    // Realiza o upload de todos os arquivos (pode ser feito em paralelo)
+    // Realiza o upload de todos os arquivos (em paralelo)
     await Promise.all(
       filesToUpload.map((file) => uploadFile(bucketName, file.local, file.key))
     );
