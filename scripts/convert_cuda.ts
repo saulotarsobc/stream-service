@@ -197,6 +197,9 @@ interface UploadFile {
         `${server}/segment/${curso}/${aula}/medium/`,
         progressMedium
       ),
+    ]);
+
+    await Promise.all([
       createHLS(
         inputFile,
         { width: 854, height: 720 },
