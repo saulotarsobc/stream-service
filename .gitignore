@@ -1,7 +1,9 @@
 **/aulas
-/node_modules
-/dist
+node_modules
+dist
 .env
 **/data
 scripts/convert_cuda.js
 scripts/convert.js
+build
+.next
