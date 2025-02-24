@@ -14,3 +14,11 @@ interface Resolution {
   width: string;
   height: string;
 }
+
+export interface UploadVideo {
+  slug: string;
+  session: string;
+  title: string;
+  size: number;
+  mimetype: string;
+}
