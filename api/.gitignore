@@ -2,6 +2,8 @@
 /dist
 /node_modules
 /build
+/prisma/dev.sqlite
+/prisma/dev.sqlite-journal
 
 # Logs
 logs

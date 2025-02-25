@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model courses {
+  id            Int      @id @default(autoincrement())
+  name          String
+  slug          String   @unique
+  description   String?
+  duration      Int?
+  author        String?
+  thumbnail_url String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  classes classes[]
+
+  @@map("courses")
+}
+
+model classes {
+  id            Int     @id @default(autoincrement())
+  title         String
+  description   String
+  course_id     Int
+  thumbnail_url String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses courses          @relation(fields: [course_id], references: [id], onDelete: NoAction)
+  videos  classes_videos[]
+
+  @@map("classes")
+}
+
+model classes_videos {
+  id       Int    @id @default(autoincrement())
+  class_id Int
+  duration Int
+  url      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes classes @relation(fields: [class_id], references: [id], onDelete: NoAction)
+
+  @@map("classes_videos")
+}

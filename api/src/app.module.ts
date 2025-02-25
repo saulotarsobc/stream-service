@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
-import { VideosModule } from './videos/videos.module';
+import { ConfigModule } from '@nestjs/config';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
-  imports: [VideosModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    CoursesModule,
+  ],
   controllers: [],
   providers: [],
 })
