@@ -26,6 +26,7 @@ export default function CourseOnePage() {
   const [editFormData, setEditFormData] = useState({
     title: "",
     description: "",
+    thumbnail_url: "",
   });
 
   const [classes, setClasses] = useState<ClassWithVideos[]>([]);
@@ -124,7 +125,7 @@ export default function CourseOnePage() {
       // Reset form and close modal
       setIsEditModalOpen(false);
       setEditingClass(null);
-      setEditFormData({ title: "", description: "" });
+      setEditFormData({ title: "", description: "", thumbnail_url: "" });
     } catch (err) {
       console.error("Error updating class:", err);
     }
@@ -136,13 +137,161 @@ export default function CourseOnePage() {
     setEditFormData({
       title: classItem.title,
       description: classItem.description,
+      thumbnail_url: classItem.thumbnail_url || "",
     });
     setIsEditModalOpen(true);
   };
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    title: "",
+    description: "",
+    thumbnail_url: "",
+  });
+
+  const handleAddSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post(`/courses/${params.id}/classes`, {
+        ...addFormData,
+        course_id: Number(params.id),
+      });
+
+      // Refresh classes list
+      const { data } = await api.get<ClassWithVideos[]>(
+        `/courses/${params.id}/classes`
+      );
+      setClasses(data);
+
+      // Reset form and close modal
+      setIsAddModalOpen(false);
+      setAddFormData({ title: "", description: "", thumbnail_url: "" });
+    } catch (err) {
+      console.error("Error creating class:", err);
+    }
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Course Classes</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Course Classes</h1>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors flex items-center"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+          Add Class
+        </button>
+      </div>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Add New Class</h2>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={addFormData.title}
+                  onChange={(e) =>
+                    setAddFormData({ ...addFormData, title: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Description
+                </label>
+                <textarea
+                  required
+                  value={addFormData.description}
+                  onChange={(e) =>
+                    setAddFormData({
+                      ...addFormData,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Thumbnail URL
+                </label>
+                <input
+                  type="url"
+                  value={addFormData.thumbnail_url}
+                  onChange={(e) =>
+                    setAddFormData({
+                      ...addFormData,
+                      thumbnail_url: e.target.value,
+                    })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  Create Class
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {selectedVideo && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -350,6 +499,23 @@ export default function CourseOnePage() {
                     })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Thumbnail URL
+                </label>
+                <input
+                  type="url"
+                  value={editFormData.thumbnail_url}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      thumbnail_url: e.target.value,
+                    })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
