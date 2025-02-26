@@ -364,9 +364,9 @@ export default function CoursesPage() {
                 <input
                   type="text"
                   required
-                  value={formData.slug}
+                  value={editFormData.slug}
                   onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
+                    setEditFormData({ ...editFormData, slug: e.target.value })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -377,9 +377,9 @@ export default function CoursesPage() {
                   Description
                 </label>
                 <textarea
-                  value={formData.description}
+                  value={editFormData.description}
                   onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                    setEditFormData({ ...editFormData, description: e.target.value })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
                 />
@@ -391,9 +391,9 @@ export default function CoursesPage() {
                 </label>
                 <input
                   type="number"
-                  value={formData.duration}
+                  value={editFormData.duration}
                   onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
+                    setEditFormData({ ...editFormData, duration: e.target.value })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -405,9 +405,9 @@ export default function CoursesPage() {
                 </label>
                 <input
                   type="text"
-                  value={formData.author}
+                  value={editFormData.author}
                   onChange={(e) =>
-                    setFormData({ ...formData, author: e.target.value })
+                    setEditFormData({ ...editFormData, author: e.target.value })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -419,9 +419,9 @@ export default function CoursesPage() {
                 </label>
                 <input
                   type="url"
-                  value={formData.thumbnail_url}
+                  value={editFormData.thumbnail_url}
                   onChange={(e) =>
-                    setFormData({ ...formData, thumbnail_url: e.target.value })
+                    setEditFormData({ ...editFormData, thumbnail_url: e.target.value })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
