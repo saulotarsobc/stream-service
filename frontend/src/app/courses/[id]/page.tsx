@@ -31,8 +31,8 @@ export default function CourseOnePage() {
   });
 
   const [classes, setClasses] = useState<ClassWithVideos[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
@@ -53,8 +53,6 @@ export default function CourseOnePage() {
           "Failed to load classes";
         console.error("Error fetching classes:", err);
         setError(`${errorMessage}. Please try again.`);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -171,6 +169,12 @@ export default function CourseOnePage() {
       console.error("Error creating class:", err);
     }
   };
+
+  {
+    error && (
+      <div className="bg-red-500 text-white p-4 rounded-md mb-4">{error}</div>
+    );
+  }
 
   return (
     <main className="container mx-auto px-4 py-8">

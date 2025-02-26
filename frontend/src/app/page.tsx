@@ -34,13 +34,13 @@ export default function CoursesPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const { data }: any = await api.get("/courses");
+        const { data } = await api.get<courses[]>("/courses");
         setCourses(data);
         setError(null);
-      } catch (err: any) {
+      } catch (err) {
         const errorMessage =
-          err.response?.data?.message ||
-          err.message ||
+          (err as any).response?.data?.message ||
+          (err as any).message ||
           "Failed to load courses";
         console.error("Error fetching courses:", err);
         setError(`${errorMessage}. Please try again.`);
