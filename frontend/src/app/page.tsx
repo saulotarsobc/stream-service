@@ -1,6 +1,7 @@
 "use client";
 import { api } from "@/services/api";
 import { courses } from "@prisma/client";
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -124,9 +125,14 @@ export default function CoursesPage() {
 
     try {
       setFormError(null);
-      const duration = editFormData.duration ? parseInt(editFormData.duration) : 0;
-      await api.patch(`/courses/${editingCourse.id}`, { ...editFormData, duration });
-      
+      const duration = editFormData.duration
+        ? parseInt(editFormData.duration)
+        : 0;
+      await api.patch(`/courses/${editingCourse.id}`, {
+        ...editFormData,
+        duration,
+      });
+
       setIsEditModalOpen(false);
       setEditingCourse(null);
       setEditFormData({
@@ -139,7 +145,8 @@ export default function CoursesPage() {
       });
       setRetryCount((prev) => prev + 1);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || "Failed to update course";
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to update course";
       setFormError(errorMessage);
     }
   };
@@ -379,7 +386,10 @@ export default function CoursesPage() {
                 <textarea
                   value={editFormData.description}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, description: e.target.value })
+                    setEditFormData({
+                      ...editFormData,
+                      description: e.target.value,
+                    })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
                 />
@@ -393,7 +403,10 @@ export default function CoursesPage() {
                   type="number"
                   value={editFormData.duration}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, duration: e.target.value })
+                    setEditFormData({
+                      ...editFormData,
+                      duration: e.target.value,
+                    })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -421,7 +434,10 @@ export default function CoursesPage() {
                   type="url"
                   value={editFormData.thumbnail_url}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, thumbnail_url: e.target.value })
+                    setEditFormData({
+                      ...editFormData,
+                      thumbnail_url: e.target.value,
+                    })
                   }
                   className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -455,10 +471,13 @@ export default function CoursesPage() {
             className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105"
           >
             <div className="aspect-video relative">
-              <img
+              <Image
                 src={course.thumbnail_url || "https://picsum.photos/200/300"}
                 alt={course.slug}
+                width={400}
+                height={225}
                 className="w-full h-full object-cover"
+                unoptimized
               />
             </div>
             <div className="p-6">

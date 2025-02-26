@@ -10,6 +10,7 @@ type ClassVideo = {
   id: number;
   class_id: number;
   video_id: string;
+  url: string;
 };
 
 // Extend the classes type to include videos
@@ -383,10 +384,9 @@ export default function CourseOnePage() {
               </div>
               <div className="flex gap-2">
                 {classItem.videos && classItem.videos.length > 0 && (
-                  // Update the button onClick handler
                   <button
                     onClick={() =>
-                      handlePlayVideo((classItem.videos[0] as any).url)
+                      handlePlayVideo(classItem.videos[0].url as string)
                     }
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
                   >
