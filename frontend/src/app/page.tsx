@@ -30,50 +30,6 @@ export default function CoursesPage() {
     thumbnail_url: "",
   });
 
-  const handleEditClick = (course: courses) => {
-    setEditingCourse(course);
-    setEditFormData({
-      name: course.name,
-      slug: course.slug,
-      description: course.description || "",
-      duration: course.duration?.toString() || "",
-      author: course.author || "",
-      thumbnail_url: course.thumbnail_url || "",
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!editingCourse) return;
-
-    try {
-      setFormError(null);
-      const duration = editFormData.duration
-        ? parseInt(editFormData.duration)
-        : 0;
-      await api.patch(`/courses/${editingCourse.id}`, {
-        ...editFormData,
-        duration,
-      });
-      setIsEditModalOpen(false);
-      setEditingCourse(null);
-      setEditFormData({
-        name: "",
-        slug: "",
-        description: "",
-        duration: "",
-        author: "",
-        thumbnail_url: "",
-      });
-      setRetryCount((prev) => prev + 1);
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Failed to update course";
-      setFormError(errorMessage);
-    }
-  };
-
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -158,6 +114,32 @@ export default function CoursesPage() {
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message || err.message || "Failed to create course";
+      setFormError(errorMessage);
+    }
+  };
+
+  const handleEditSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingCourse) return;
+
+    try {
+      setFormError(null);
+      const duration = editFormData.duration ? parseInt(editFormData.duration) : 0;
+      await api.patch(`/courses/${editingCourse.id}`, { ...editFormData, duration });
+      
+      setIsEditModalOpen(false);
+      setEditingCourse(null);
+      setEditFormData({
+        name: "",
+        slug: "",
+        description: "",
+        duration: "",
+        author: "",
+        thumbnail_url: "",
+      });
+      setRetryCount((prev) => prev + 1);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to update course";
       setFormError(errorMessage);
     }
   };
@@ -326,9 +308,149 @@ export default function CoursesPage() {
         </div>
       )}
 
+      {/* Add Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Edit Course</h2>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {formError && (
+              <div className="bg-red-500 bg-opacity-10 border border-red-500 text-red-500 px-4 py-3 rounded-md mb-6">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              {/* Same form fields as Add Course modal but using editFormData */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, name: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Slug
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Duration (seconds)
+                </label>
+                <input
+                  type="number"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duration: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Author
+                </label>
+                <input
+                  type="text"
+                  value={formData.author}
+                  onChange={(e) =>
+                    setFormData({ ...formData, author: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Thumbnail URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.thumbnail_url}
+                  onChange={(e) =>
+                    setFormData({ ...formData, thumbnail_url: e.target.value })
+                  }
+                  className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  Update Course
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
-          <div
+          <Link
+            href={`/courses/${course.id}`}
             key={`course-${course.slug}`}
             className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105"
           >
@@ -340,213 +462,43 @@ export default function CoursesPage() {
               />
             </div>
             <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
-                <div className="flex gap-4">
-                  <Link
-                    href={`/courses/${course.id}`}
-                    className="p-3 text-gray-400 hover:text-white transition-colors bg-gray-700 rounded-md hover:bg-gray-600 flex items-center gap-2"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    <span>View</span>
-                  </Link>
-                  <button
-                    onClick={() => handleEditClick(course)}
-                    className="p-3 text-gray-400 hover:text-white transition-colors bg-gray-700 rounded-md hover:bg-gray-600 flex items-center gap-2"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                      />
-                    </svg>
-                    <span>Edit</span>
-                  </button>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
+                  <p className="text-gray-400 mb-4">#{course.slug}</p>
                 </div>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEditingCourse(course);
+                    setEditFormData({
+                      name: course.name,
+                      slug: course.slug,
+                      description: course.description || "",
+                      duration: course.duration?.toString() || "",
+                      author: course.author || "",
+                      thumbnail_url: course.thumbnail_url || "",
+                    });
+                    setIsEditModalOpen(true);
+                  }}
+                  className="p-2 text-gray-400 hover:text-white"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                  </svg>
+                </button>
               </div>
-
-              {/* Add Edit Modal */}
-              {isEditModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold">Edit Course</h2>
-                      <button
-                        onClick={() => setIsEditModalOpen(false)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {formError && (
-                      <div className="bg-red-500 bg-opacity-10 border border-red-500 text-red-500 px-4 py-3 rounded-md mb-6">
-                        {formError}
-                      </div>
-                    )}
-
-                    <form onSubmit={handleEditSubmit} className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={editFormData.name}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              name: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Slug
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={editFormData.slug}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              slug: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Description
-                        </label>
-                        <textarea
-                          value={editFormData.description}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              description: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Duration (seconds)
-                        </label>
-                        <input
-                          type="number"
-                          value={editFormData.duration}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              duration: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Author
-                        </label>
-                        <input
-                          type="text"
-                          value={editFormData.author}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              author: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">
-                          Thumbnail URL
-                        </label>
-                        <input
-                          type="url"
-                          value={editFormData.thumbnail_url}
-                          onChange={(e) =>
-                            setEditFormData({
-                              ...editFormData,
-                              thumbnail_url: e.target.value,
-                            })
-                          }
-                          className="w-full bg-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div className="flex justify-end space-x-4 pt-4">
-                        <button
-                          type="button"
-                          onClick={() => setIsEditModalOpen(false)}
-                          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
-                        >
-                          Update Course
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              )}
-
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span className="flex items-center">
                   <svg
@@ -588,7 +540,7 @@ export default function CoursesPage() {
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
