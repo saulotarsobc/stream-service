@@ -2,6 +2,7 @@
 import { api } from "@/services/api";
 import { socket } from "@/services/socket-io";
 import { UploadVideo, VideoProgress } from "@/ts/interfaces";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -13,6 +14,16 @@ export default function Home() {
   const [timemark720, setTimemark720] = useState("");
   const [progress1080, setProgress1080] = useState(0);
   const [timemark1080, setTimemark1080] = useState("");
+
+  const params = useParams();
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      console.log({ params });
+    };
+
+    fetchClasses();
+  }, [params.id]);
 
   useEffect(() => {
     const conectToSocket = async () => {
