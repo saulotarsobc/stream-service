@@ -1,7 +1,7 @@
 "use client";
 import { api } from "@/services/api";
 import { socket } from "@/services/socket-io";
-import { UploadVideo, VideoProgress } from "@/ts/interfaces";
+import { VideoProgress } from "@/ts/interfaces";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -14,81 +14,59 @@ export default function Home() {
   const [timemark720, setTimemark720] = useState("");
   const [progress1080, setProgress1080] = useState(0);
   const [timemark1080, setTimemark1080] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const params = useParams();
 
   useEffect(() => {
-    const fetchClasses = async () => {
-      console.log({ params });
-    };
-
-    fetchClasses();
-  }, [params.id]);
-
-  useEffect(() => {
-    const conectToSocket = async () => {
-      socket.on("up/jw-anime/jeremias", (data: UploadVideo) => {
-        console.table(data);
-      });
-      socket.on("pro/jw-anime/jeremias/360", (data: VideoProgress) => {
-        console.log(data);
-        setProgress360(Number(data.percent?.toFixed(2) ?? 0));
+    socket.on(`segment/class/${params.id}`, (data: VideoProgress) => {
+      console.table(data);
+      if (data.resolution.width === "360") {
+        setProgress360(Number(data.percent));
         setTimemark360(data.timemark);
-      });
-      socket.on("pro/jw-anime/jeremias/480", (data: VideoProgress) => {
-        console.log(data);
-        setProgress480(Number(data.percent?.toFixed(2) ?? 0));
+      } else if (data.resolution.width === "480") {
+        setProgress480(Number(data.percent));
         setTimemark480(data.timemark);
-      });
-      socket.on("pro/jw-anime/jeremias/720", (data: VideoProgress) => {
-        console.log(data);
-        setProgress720(Number(data.percent?.toFixed(2) ?? 0));
+      } else if (data.resolution.width === "720") {
+        setProgress720(Number(data.percent));
         setTimemark720(data.timemark);
-      });
-      socket.on("pro/jw-anime/jeremias/1080", (data: VideoProgress) => {
-        console.log(data);
-        setProgress1080(Number(data.percent?.toFixed(2) ?? 0));
+      } else if (data.resolution.width === "1080") {
+        setProgress1080(Number(data.percent));
         setTimemark1080(data.timemark);
-      });
-    };
-
-    conectToSocket();
+      }
+    });
 
     return () => {
-      socket.off("up/jw-anime/jeremias");
-      socket.off("pro/jw-anime/jeremias/360");
-      socket.off("pro/jw-anime/jeremias/480");
-      socket.off("pro/jw-anime/jeremias/720");
-      socket.off("pro/jw-anime/jeremias/1080");
+      socket.off(`segment/class/${params.id}`);
     };
-  }, []);
+  }, [params.id]);
+
+  const handleStartSegmentation = async () => {
+    try {
+      setIsProcessing(true);
+      await api.post(`/courses/segment/class/${params.id}/`);
+    } catch (error) {
+      console.error("Error starting segmentation:", error);
+    }
+  };
 
   return (
     <main className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Video Segmentation Progress</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Video Segmentation Progress</h1>
+        <button
+          onClick={handleStartSegmentation}
+          disabled={isProcessing}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          {isProcessing ? "Processing..." : "Start Segmentation"}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">360p</h2>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={async () => {
-                await api.post("/videos/segment", {
-                  slug: "jw-anime",
-                  session: "jeremias",
-                  title: "Jeremias teve coragem.mp4",
-                  resolution: {
-                    width: "426",
-                    height: "360",
-                  },
-                  bitrate: "96k",
-                  hls_time: "5",
-                  hls_list_size: "0",
-                });
-              }}
-            >
-              Process 360p
-            </button>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-300">
@@ -110,25 +88,6 @@ export default function Home() {
         <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">480p</h2>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={async () => {
-                await api.post("/videos/segment", {
-                  slug: "jw-anime",
-                  session: "jeremias",
-                  title: "Jeremias teve coragem.mp4",
-                  resolution: {
-                    width: "640",
-                    height: "480",
-                  },
-                  bitrate: "128k",
-                  hls_time: "5",
-                  hls_list_size: "0",
-                });
-              }}
-            >
-              Process 480p
-            </button>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-300">
@@ -150,25 +109,6 @@ export default function Home() {
         <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">720p</h2>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={async () => {
-                await api.post("/videos/segment", {
-                  slug: "jw-anime",
-                  session: "jeremias",
-                  title: "Jeremias teve coragem.mp4",
-                  resolution: {
-                    width: "854",
-                    height: "720",
-                  },
-                  bitrate: "160k",
-                  hls_time: "5",
-                  hls_list_size: "0",
-                });
-              }}
-            >
-              Process 720p
-            </button>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-300">
@@ -190,25 +130,6 @@ export default function Home() {
         <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">1080p</h2>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={async () => {
-                await api.post("/videos/segment", {
-                  slug: "jw-anime",
-                  session: "jeremias",
-                  title: "Jeremias teve coragem.mp4",
-                  resolution: {
-                    width: "1920",
-                    height: "1080",
-                  },
-                  bitrate: "192k",
-                  hls_time: "5",
-                  hls_list_size: "0",
-                });
-              }}
-            >
-              Process 1080p
-            </button>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-300">

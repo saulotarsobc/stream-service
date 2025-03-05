@@ -1,7 +1,7 @@
 export interface VideoProgress {
   slug?: string;
   session?: string;
-  resolution?: Resolution;
+  resolution: Resolution;
   frames: number;
   currentFps: number;
   currentKbps: number;

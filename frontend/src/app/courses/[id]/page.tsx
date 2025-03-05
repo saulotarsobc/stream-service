@@ -64,7 +64,7 @@ export default function CourseOnePage() {
     setSelectedVideo(videoUrl);
   };
 
-  const handleUploadVideo = async (classId: string) => {
+  const handleUploadVideo = async (class_id: string) => {
     try {
       const formData = new FormData();
       const input = document.createElement("input");
@@ -79,7 +79,7 @@ export default function CourseOnePage() {
 
         try {
           await api.post(
-            `/courses/${params.id}/classes/${classId}/upload`,
+            `/courses/${params.id}/classes/${class_id}/upload`,
             formData,
             {
               headers: {

@@ -91,4 +91,10 @@ export class CoursesController {
   ) {
     return this.coursesService.uploadVideoFile(videoFile, course_id, class_id);
   }
+
+  @Post('/segment/class/:class_id')
+  segmentClass(@Param('class_id', ParseIntPipe) class_id: number) {
+    console.log({ class_id });
+    return class_id;
+  }
 }
