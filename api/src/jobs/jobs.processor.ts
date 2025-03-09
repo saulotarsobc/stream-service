@@ -1,8 +1,8 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
+import { JOB_NAMES, QUEUES } from 'src/enums';
 import { setTimeout } from 'timers/promises';
-import { JOB_NAMES, QUEUES } from './enums';
 
 @Processor(QUEUES.VIDEOS)
 export class JobsProcessor {

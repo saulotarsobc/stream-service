@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bull';
-import { JOB_NAMES, QUEUES } from './enums';
+import { JOB_NAMES, QUEUES } from 'src/enums';
 
 @Injectable()
 export class JobsService implements OnModuleInit {

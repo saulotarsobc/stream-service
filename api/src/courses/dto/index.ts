@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Resolution } from 'src/ts/interfaces';
+import { Resolution } from 'src/interfaces';
 
 export class CreateCourseDto {
   @IsString({ message: 'Name must be a string' })

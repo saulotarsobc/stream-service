@@ -4,7 +4,7 @@ import { MiddlewareBuilder } from '@nestjs/core';
 import { Queue } from 'bull';
 import { createBullBoard } from 'bull-board';
 import { BullAdapter } from 'bull-board/bullAdapter';
-import { QUEUES } from './enums';
+import { QUEUES } from 'src/enums';
 import { JobsProcessor } from './jobs.processor';
 import { JobsService } from './jobs.service';
 
