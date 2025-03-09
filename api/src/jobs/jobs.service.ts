@@ -18,6 +18,6 @@ export class JobsService implements OnModuleInit {
     //   this.addJob({ message: 'Hello, World!' }).then(() => {
     //     this.logger.debug('Job added to queue');
     //   });
-    // }, 100);
+    // }, 10);
   }
 }
