@@ -9,7 +9,8 @@ export class JobsService implements OnModuleInit {
 
   constructor(@InjectQueue(QUEUES.VIDEOS) private readonly queue: Queue) {}
 
-  async addJob(data: any): Promise<void> {
+  async addVideoUploaded(data: any): Promise<void> {
+    this.logger.log('Adding video uploaded job to queue');
     await this.queue.add(JOB_NAMES.VIDEO_UPLOADED, data);
   }
 
@@ -18,6 +19,6 @@ export class JobsService implements OnModuleInit {
     //   this.addJob({ message: 'Hello, World!' }).then(() => {
     //     this.logger.debug('Job added to queue');
     //   });
-    // }, 10);
+    // }, 1000);
   }
 }
