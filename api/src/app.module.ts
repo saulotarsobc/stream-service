@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { CoursesModule } from './courses/courses.module';
 import { JobsModule } from './jobs/jobs.module';
+import { VideosModule } from './videos/videos.module';
 
 @Module({
   imports: [
@@ -9,7 +9,7 @@ import { JobsModule } from './jobs/jobs.module';
       isGlobal: true,
     }),
     JobsModule,
-    CoursesModule,
+    VideosModule,
   ],
   controllers: [],
   providers: [],

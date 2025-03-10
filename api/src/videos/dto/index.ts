@@ -2,7 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Resolution } from 'src/interfaces';
 
-export class CreateCourseDto {
+export class CreateVideoDto {
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
@@ -35,7 +35,7 @@ export class CreateClassesDto {
 
 export class UpdateClassesDto extends PartialType(CreateClassesDto) {}
 
-export class SegmentCourseDto {
+export class SegmentVideoDto {
   @IsNotEmpty({ message: 'Resolution is required' })
   resolution: Resolution;
 
@@ -52,4 +52,4 @@ export class SegmentCourseDto {
   hls_list_size: string;
 }
 
-export class UpdateCourseDto extends PartialType(CreateCourseDto) {}
+export class UpdateVideoDto extends PartialType(CreateVideoDto) {}

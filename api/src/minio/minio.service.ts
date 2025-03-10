@@ -17,11 +17,11 @@ export class MinioService {
 
   async uploadVideoFile(
     file: Express.Multer.File,
-    course_id: number,
+    video_id: number,
     class_id: number,
   ) {
     const buffer = file.buffer;
-    const finalName = `${course_id}/${class_id}/original.mp4`;
+    const finalName = `${video_id}/${class_id}/original.mp4`;
 
     try {
       const info: UploadedObjectInfo = await this.minioClient.putObject(
